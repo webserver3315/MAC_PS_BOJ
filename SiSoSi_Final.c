@@ -16,7 +16,7 @@ typedef struct myHold {
 } Hold;
 
 typedef struct myHuman {
-    Hold hold;        //패
+    Hold* hold;       //패
     int motteruCard;  //현재 라운드에서 소유중인 카드수
     int Score;
     int isDealer;  //딜러여부
@@ -35,8 +35,8 @@ Card* create_node(Card* from, int val) {
     return new_node;
 }
 
-int holdIndexAccess(Human h, int idx) {
-    Card* cur = h.hold.first;
+int holdIndexAccess(Hold* h, int idx) {
+    Card* cur = h->first;
     for (int i = 0; i < idx; i++) {
         cur = cur->next;
     }
@@ -44,28 +44,34 @@ int holdIndexAccess(Human h, int idx) {
     return ret;
 }
 
-void holdReset(Human h) {  //h.hold 전부 할당해제 및 크기0으로
-    Card* cur = h.hold.first;
+void holdReset(Hold* h) {  //h.hold 전부 할당해제 및 크기0으로
+    Card* cur = h->first;
     while (cur->next != NULL) {
         Card* before = cur;
         cur = cur->next;
         free(before);
+        h->size -= 1;
     }
     free(cur);
-    h.hold.size = 0;
+    h->first = NULL;
+    h->last = NULL;
+    h->size = 0;
 }
 
-void holdAppend(Human h, int val) {
-    Hold head = h.hold;
-    if (head.last == NULL) {
-        head.last = create_node(NULL, val);
-        head.first = head.last;
+void holdAppend(Hold* head, int val) {
+    Card* newCard;
+    newCard = (Card*)malloc(sizeof(Card));
+    if (newCard == NULL) exit(1);
+    newCard->val = val;
+    newCard->next = NULL;
+    if (head->first == NULL && head->last == NULL) {
+        // head->first = create_node(NULL, val);
+        head->first = head->last = newCard;
     } else {
-        Card* p = head.last;
-        p->next = create_node(head.last, val);
-        head.last = p->next;
+        head->last->next = newCard;
+        head->last = newCard;
     }
-    h.hold.size++;
+    head->size += 1;
 }
 
 void printScore() {
@@ -98,13 +104,13 @@ void PunPai() {                     //카드 초기 분배
         if (nokoriCardCnt) {
             int c1 = getCard();
             // player[i].hold.push_back(c1);
-            holdAppend(player[i], c1);
+            holdAppend(player[i].hold, c1);
             player[i].motteruCard++;
         }
         if (nokoriCardCnt) {
             int c2 = getCard();
             // player[i].hold.push_back(c2);
-            holdAppend(player[i], c2);
+            holdAppend(player[i].hold, c2);
             player[i].motteruCard++;
         }
     }
@@ -113,8 +119,8 @@ void PunPai() {                     //카드 초기 분배
 int getCardPoint(const Human h) {
     int ret = 0;
     int aceNum = 0;
-    for (int i = 0; i < h.hold.size; i++) {
-        int cur = holdIndexAccess(h, i);
+    for (int i = 0; i < h.hold->size; i++) {
+        int cur = holdIndexAccess(h.hold, i);
         int pict = cur / 4;
         int num = cur % 13;
         if (num == 0) {
@@ -181,18 +187,18 @@ void ShowCard(int hide) {
             if (hide)
                 printf("(뒤집어져 안보임), ");
             else {
-                char* name = translate(holdIndexAccess(player[i], 0));
+                char* name = translate(holdIndexAccess(player[i].hold, 0));
                 printf("%s, ", name);
                 free(name);
             }
-            for (int j = 1; j < player[i].hold.size; j++) {
-                char* name = translate(holdIndexAccess(player[i], j));
+            for (int j = 1; j < player[i].hold->size; j++) {
+                char* name = translate(holdIndexAccess(player[i].hold, j));
                 printf("%s, ", name);
                 free(name);
             }
         } else {
-            for (int j = 0; j < player[i].hold.size; j++) {
-                char* name = translate(holdIndexAccess(player[i], j));
+            for (int j = 0; j < player[i].hold->size; j++) {
+                char* name = translate(holdIndexAccess(player[i].hold, j));
                 printf("%s, ", name);
                 free(name);
             }
@@ -217,7 +223,7 @@ void DrawEveryone() {
             break;
         } else {
             // player[i].hold.push_back(cur);
-            holdAppend(player[i], cur);
+            holdAppend(player[i].hold, cur);
             player[i].motteruCard++;
             char* name = translate(cur);
             printf("You Drawed %s\n", name);
@@ -239,7 +245,7 @@ void DrawEveryone() {
                 break;
             } else {
                 // player[i].hold.push_back(cur);
-                holdAppend(player[i], cur);
+                holdAppend(player[i].hold, cur);
                 player[i].motteruCard++;
                 if (getCardPoint(player[i]) == 21) {
                     printf("Player %d BlackJack!!!\n", i);
@@ -260,7 +266,7 @@ void DrawEveryone() {
                     printf("덱 고갈!!!\n");
                 } else {
                     // player[i].hold.push_back(cur);
-                    holdAppend(player[i], cur);
+                    holdAppend(player[i].hold, cur);
                     player[i].motteruCard++;
                     if (getCardPoint(player[i]) == 21) {
                         printf("Player %d BlackJack!!!\n", i);
@@ -282,7 +288,7 @@ void DrawEveryone() {
             break;
         } else {
             // player[i].hold.push_back(cur);
-            holdAppend(player[i], cur);
+            holdAppend(player[i].hold, cur);
             player[i].motteruCard++;
             if (getCardPoint(player[i]) == 21) {
                 printf("BlackJack!!!\n");
@@ -368,7 +374,7 @@ void Kaikei() {  //결산
 void endRound() {
     for (int i = 0; i <= N; i++) {
         // player[i].hold.clear();
-        holdReset(player[i]);
+        holdReset(player[i].hold);
         player[i].motteruCard = 0;
     }
 }
@@ -398,13 +404,18 @@ int main() {
         }
         player[i].motteruCard = 0;
         player[i].Score = 500;  //500점 초기자본으로 주고 시작하자
-        player[i].hold.size = 0;
-        player[i].hold.first = NULL;
-        player[i].hold.last = NULL;
+        player[i].hold = malloc(sizeof(Hold));
+        player[i].hold->size = 0;
+        player[i].hold->first = NULL;
+        player[i].hold->last = NULL;
     }
 
     while (nokoriCardCnt >= (N + 1) * 5) {
         startRound();
+    }
+
+    for (int i = 0; i <= N; i++) {
+        free(player[i].hold);
     }
 
     return 0;
