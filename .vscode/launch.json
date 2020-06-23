@@ -7,7 +7,7 @@
       "name": "Lldb debug",
       "program": "${fileDirname}/${fileBasenameNoExtension}",
       "args": [],
-      "cwd": "${workspaceRoot}"
+      "cwd": "${fileDirname}"
     }
   ]
 }
