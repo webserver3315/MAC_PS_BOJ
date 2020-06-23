@@ -1,78 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "game.h"
+
 #include <time.h>
-#define NUMBER_OF_DECK 4
 
-typedef struct myCard {
-    int val;
-    struct myCard* next;
-} Card;
-
-typedef struct myHold {
-    int size;
-    Card* first;
-    Card* last;
-} Hold;
-
-typedef struct myHuman {
-    Hold* hold;       //패
-    int motteruCard;  //현재 라운드에서 소유중인 카드수
-    int Score;
-    int isDealer;  //딜러여부
-} Human;
-
-int N;             //플레이어 수. 딜러있으니 총 N+1명 참전.
-int deck[4 * 13];  //0은 에이스, 1은 2, ..., 9는 10, 10은 잭, 11는 퀸, 12은 킹, 몫은 스페이드 하트 다이아 클로버순
-int nokoriCardCnt = 208;
-int Round;
-Human player[7];  //0번은 딜러, 1번은 플레이어
-
-Card* create_node(Card* from, int val) {
-    Card* new_node = (Card*)malloc(sizeof(Card));
-    new_node->val = val;
-    new_node->next = NULL;
-    return new_node;
-}
-
-int holdIndexAccess(Hold* h, int idx) {
-    Card* cur = h->first;
-    for (int i = 0; i < idx; i++) {
-        cur = cur->next;
-    }
-    int ret = cur->val;
-    return ret;
-}
-
-void holdReset(Hold* h) {  //h.hold 전부 할당해제 및 크기0으로
-    Card* cur = h->first;
-    while (cur->next != NULL) {
-        Card* before = cur;
-        cur = cur->next;
-        free(before);
-        h->size -= 1;
-    }
-    free(cur);
-    h->first = NULL;
-    h->last = NULL;
-    h->size = 0;
-}
-
-void holdAppend(Hold* head, int val) {
-    Card* newCard;
-    newCard = (Card*)malloc(sizeof(Card));
-    if (newCard == NULL) exit(1);
-    newCard->val = val;
-    newCard->next = NULL;
-    if (head->first == NULL && head->last == NULL) {
-        // head->first = create_node(NULL, val);
-        head->first = head->last = newCard;
-    } else {
-        head->last->next = newCard;
-        head->last = newCard;
-    }
-    head->size += 1;
-}
+#include "list.h"
 
 void printScore() {
     printf("------SCORE---------\n");
@@ -143,40 +73,35 @@ int getCardPoint(const Human h) {
 }
 
 char* translate(int i) {
-    char* pict;
-    char* numch;
-    pict = (char*)malloc(20);
-    numch = (char*)malloc(10);
+    //char* ret = (char*)malloc(30);
+    char ret[30];
     if (i / 13 == 0) {
-        strcat(pict, "Spade ");
+        strcpy(ret, "Spade ");
     } else if (i / 13 == 1) {
-        strcat(pict, "Heart ");
+        strcpy(ret, "Heart ");
     } else if (i / 13 == 2) {
-        strcat(pict, "Diamond ");
+        strcpy(ret, "Diamond ");
     } else if (i / 13 == 3) {
-        strcat(pict, "Clover ");
+        strcpy(ret, "Clover ");
     }
 
     int num = (i % 13) + 1;
     if (num == 1) {
-        strcat(numch, "A");
+        strcat(ret, "A");
     } else if (num == 11) {
-        strcat(numch, "j");
+        strcat(ret, "j");
     } else if (num == 12) {
-        strcat(numch, "Q");
+        strcat(ret, "Q");
     } else if (num == 13) {
-        strcat(numch, "K");
+        strcat(ret, "K");
     } else {
-        sprintf(numch, "%d", num);
+        char tmp[10];
+        sprintf(tmp, "%d", num);
+        strcat(ret, tmp);
     }
-
-    char* ret = (char*)malloc(30);
-    strcat(ret, pict);
-    strcat(ret, numch);
-
-    free(pict);
-    free(numch);
-    return ret;
+    char* realret = (char*)malloc(30);
+    strcpy(realret, ret);
+    return realret;
 }
 
 void ShowCard(int hide) {
@@ -387,36 +312,4 @@ void startRound() {
     DrawEveryone();
     Kaikei();
     endRound();
-}
-
-int main() {
-    srand((unsigned int)time(NULL));
-    printf("Number of Players: ");
-    scanf("%d", &N);
-    for (int i = 0; i < 4 * 13; i++) {
-        deck[i] = NUMBER_OF_DECK;  //덱마다 52장인데, 이것들이 4장씩 있음.
-    }
-    for (int i = 0; i <= N; i++) {
-        if (i == 0) {
-            player[i].isDealer = 1;  //딜러에게 스코어는 무의미하지만..
-        } else {
-            player[i].isDealer = 0;
-        }
-        player[i].motteruCard = 0;
-        player[i].Score = 500;  //500점 초기자본으로 주고 시작하자
-        player[i].hold = malloc(sizeof(Hold));
-        player[i].hold->size = 0;
-        player[i].hold->first = NULL;
-        player[i].hold->last = NULL;
-    }
-
-    while (nokoriCardCnt >= (N + 1) * 5) {
-        startRound();
-    }
-
-    for (int i = 0; i <= N; i++) {
-        free(player[i].hold);
-    }
-
-    return 0;
 }
