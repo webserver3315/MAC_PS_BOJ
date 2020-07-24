@@ -1,0 +1,1 @@
+{"group":"local","interactive":false,"local":true,"memoryLimit":1024,"name":"Local: 200628B","srcPath":"/Users/kyeongtaepark/Documents/Mac_PS_BOJ/Codeforce/200628B.cpp","tests":[{"id":1593355645215,"input":"7\n1\n2\n3\n12\n12345\n15116544\n387420489","output":"0\n-1\n2\n-1\n-1\n12\n36"}],"timeLimit":3000,"url":"/Users/kyeongtaepark/Documents/Mac_PS_BOJ/Codeforce/200628B.cpp"}

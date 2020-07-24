@@ -1,0 +1,1 @@
+{"group":"local","interactive":false,"local":true,"memoryLimit":1024,"name":"Local: 200628C","srcPath":"/Users/kyeongtaepark/Documents/Mac_PS_BOJ/Codeforce/200628C.cpp","tests":[{"id":1593356371627,"input":"4\n2\n)(\n4\n()()\n8\n())()()(\n10\n)))((((())","output":"1\n0\n1\n3"}],"timeLimit":3000,"url":"/Users/kyeongtaepark/Documents/Mac_PS_BOJ/Codeforce/200628C.cpp"}

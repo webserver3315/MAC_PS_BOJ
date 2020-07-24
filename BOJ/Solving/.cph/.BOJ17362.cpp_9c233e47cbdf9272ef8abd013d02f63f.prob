@@ -1,0 +1,1 @@
+{"group":"local","interactive":false,"local":true,"memoryLimit":1024,"name":"Local: BOJ17362","srcPath":"/Users/kyeongtaepark/Documents/Mac_PS_BOJ/BOJ/Solving/BOJ17362.cpp","tests":[{"id":1595346401289,"input":"3","output":"3"},{"id":1595346405788,"input":"1000","output":"2"}],"timeLimit":3000,"url":"/Users/kyeongtaepark/Documents/Mac_PS_BOJ/BOJ/Solving/BOJ17362.cpp"}
